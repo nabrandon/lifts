@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lifts</title>
+<meta name="theme-color" content="#15191e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lifts">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{-webkit-text-size-adjust:100%}body{margin:0}
+
+/* Layout: sticky muscle-group rail on top, single column of exercise cards; tier badges use competition plate colors */
+:root{
+  --bg:#eef0f2; --surface:#ffffff; --ink:#15191e; --muted:#5d6670; --line:#d7dbe0;
+  --plate-red:#c8262c; --plate-blue:#1f5fbf; --plate-yellow:#d9a400; --plate-green:#2f8f4e;
+  --chip:#e1e5ea; --chip-on:#15191e; --chip-on-ink:#ffffff;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111418; --surface:#1a1f25; --ink:#eef1f4; --muted:#98a2ad; --line:#2b323a;
+  --plate-red:#e5484d; --plate-blue:#4d8ef0; --plate-yellow:#f0c233; --plate-green:#4cb872;
+  --chip:#242a32; --chip-on:#eef1f4; --chip-on-ink:#111418; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#111418; --surface:#1a1f25; --ink:#eef1f4; --muted:#98a2ad; --line:#2b323a;
+  --plate-red:#e5484d; --plate-blue:#4d8ef0; --plate-yellow:#f0c233; --plate-green:#4cb872;
+  --chip:#242a32; --chip-on:#eef1f4; --chip-on-ink:#111418; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+header h1{font-family:var(--display);font-weight:800;font-size:2.6rem;line-height:.95;letter-spacing:.01em;text-transform:uppercase;margin:0;text-wrap:balance}
+header p{color:var(--muted);margin:.5rem 0 0;font-size:.95rem;max-width:60ch}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:.82rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin:16px -16px 0;padding:10px 16px;border-bottom:1px solid var(--line)}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;border-radius:999px;padding:8px 14px;background:var(--chip);color:var(--ink);font:600 .9rem var(--body);cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--chip-on);color:var(--chip-on-ink)}
+.chip:focus-visible,.ts:focus-visible,.toggle:focus-visible{outline:2px solid var(--plate-blue);outline-offset:2px}
+.row2{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;font-size:.85rem;color:var(--muted)}
+.toggle{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.toggle input{width:18px;height:18px;accent-color:var(--plate-red)}
+
+section.group{margin-top:26px}
+.group-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:4px}
+.group-head h2{font-family:var(--display);font-weight:800;font-size:1.7rem;text-transform:uppercase;letter-spacing:.02em;margin:0}
+.group-head a{font-size:.8rem;color:var(--muted);text-decoration:none;white-space:nowrap}
+.group-head a:hover{color:var(--ink)}
+.sub{font:600 .72rem var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+.list{display:grid;gap:8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start}
+.rank{grid-row:span 2;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:800 .95rem var(--display);background:var(--chip);color:var(--ink)}
+.card.pick .rank{background:var(--ink);color:var(--bg)}
+.name{font-weight:600;font-size:1.02rem;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.role{font-size:.8rem;color:var(--muted);grid-column:2}
+.tier{font:800 .78rem var(--display);letter-spacing:.04em;padding:2px 7px;border-radius:4px;color:#fff;line-height:1.3}
+.t-splus{background:var(--plate-red)} .t-s{background:var(--plate-blue)} .t-a{background:var(--plate-yellow);color:#1b1600} .t-na{background:var(--chip);color:var(--muted)}
+.links{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ts{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font:500 .85rem var(--mono);font-variant-numeric:tabular-nums}
+.ts:hover{border-color:var(--ink)}
+.ts svg{width:14px;height:14px;fill:var(--plate-red)}
+.ts.search{font-family:var(--body);font-weight:600;color:var(--muted)}
+.note{grid-column:2;font-size:.8rem;color:var(--muted)}
+.empty{color:var(--muted);text-align:center;padding:30px 0}
+footer{margin-top:36px;font-size:.8rem;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.chip,.ts{transition:background .15s,border-color .15s,color .15s}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Nippard Upper Body Picks</h1>
+    <p>Jeff's #1 and backup choices from The Muscle Ladder, plus the S-tier extras from his YouTube tier lists. Tap a timestamp to jump to that spot in the video.</p>
+    <div class="legend">
+      <span><b class="tier t-splus">S+</b>top of tier list</span>
+      <span><b class="tier t-s">S</b></span>
+      <span><b class="tier t-a">A</b></span>
+      <span><b class="rank" style="width:20px;height:20px;font-size:.7rem;background:var(--ink);color:var(--bg)">1</b>Jeff's choice</span>
+    </div>
+  </header>
+
+  <div class="bar">
+    <div class="chips" id="chips" role="group" aria-label="Muscle group"></div>
+    <div class="row2">
+      <label class="toggle"><input type="checkbox" id="picksOnly"> Book picks only (#1 and #2)</label>
+      <span id="count"></span>
+    </div>
+  </div>
+
+  <main id="out"></main>
+
+  <footer>Compiled from a r/JeffNippard community post. Tiers come from Jeff's YouTube tier list playlist. Traps, forearms, abs and lower back have no tier-list video, so they show the book picks only.</footer>
+</div>
+
+<script>
+const V={chest:"fGm-ef-4PVk",sh:"SgyUoY0IZ7A",back:"jLvqKgW-_G8",bi:"GNO4OtYoCYk",tri:"OpRMRhr0Ycc"};
+const L=(v,t)=>({v,t});
+// kind: 1 = My choice, 2 = Backup, s = S-tier extra, h = per-head pick
+const DATA=[
+ {id:"chest",name:"Chest",video:V.chest,items:[
+  {k:1,n:"Machine chest press",tier:"S+",l:[L(V.chest,274),L(V.chest,812)]},
+  {k:2,n:"Dumbbell incline press",tier:"A",l:[L(V.chest,255)]},
+  {k:"s",n:"Seated cable pec flye",tier:"S",l:[L(V.chest,649)]}]},
+ {id:"shoulders",name:"Shoulders",video:V.sh,items:[
+  {k:1,n:"Cable lateral raise",tier:"S+",l:[L(V.sh,476),L(V.sh,770)]},
+  {k:2,n:"Lean-in dumbbell lateral raise",tier:"A",l:[L(V.sh,161)]},
+  {k:"s",n:"Cable Y-raise",tier:"S",l:[L(V.sh,532)]},
+  {k:"s",n:"Behind-the-back cuffed lateral raise",tier:"S",l:[L(V.sh,545)]},
+  {k:"s",n:"Reverse pec deck",tier:"S",l:[L(V.sh,626)]},
+  {k:"s",n:"Reverse cable crossover",tier:"S",l:[L(V.sh,718)]},
+  {k:"h",head:"Front delt",n:"Machine shoulder press",tier:"A",l:[L(V.sh,348)]},
+  {k:"h",head:"Side delt",n:"Cable lateral raise",tier:"S+",l:[L(V.sh,476)]},
+  {k:"h",head:"Rear delt",n:"Reverse cable crossover",tier:"S",l:[L(V.sh,718)]}]},
+ {id:"lats",name:"Lats",video:V.back,items:[
+  {k:1,n:"Neutral-grip close-grip lat pulldown",tier:"S+",note:"Close-grip version is unranked",l:[L(V.back,238),L(V.back,692)]},
+  {k:2,n:"Neutral-grip pull-up",tier:"A",l:[L(V.back,195)]},
+  {k:"s",n:"Wide-grip lat pulldown",tier:"S",l:[L(V.back,217)]},
+  {k:"s",n:"Half-kneeling 1-arm lat pulldown",tier:"S",l:[L(V.back,248)]}]},
+ {id:"midback",name:"Mid-back",video:V.back,items:[
+  {k:1,n:"Chest-supported T-bar row",tier:"S",l:[L(V.back,532)]},
+  {k:2,n:"Deficit Pendlay row",tier:"A",l:[L(V.back,378)]},
+  {k:"s",n:"Meadows row",tier:"S",l:[L(V.back,387)]},
+  {k:"s",n:"Cable row",tier:"S",l:[L(V.back,561)]},
+  {k:"s",n:"Wide-grip cable row",tier:"S",l:[L(V.back,576)]}]},
+ {id:"biceps",name:"Biceps",video:V.bi,items:[
+  {k:1,n:"Bayesian cable curl",tier:"S+",l:[L(V.bi,626),L(V.bi,891)]},
+  {k:2,n:"45° dumbbell preacher curl",tier:"S",l:[L(V.bi,264),L(V.bi,898)]},
+  {k:"s",n:"Machine preacher curl",tier:"S",l:[L(V.bi,421)]},
+  {k:"s",n:"Hammer-grip preacher curl",tier:"S",l:[L(V.bi,856)]}]},
+ {id:"triceps",name:"Triceps",video:V.tri,items:[
+  {k:1,n:"Overhead cable triceps extension",tier:"S+",l:[L(V.tri,192),L(V.tri,855)]},
+  {k:2,n:"Skull crusher (EZ-bar or dumbbells)",tier:"S",note:"Barbell S tier · dumbbells A tier",l:[L(V.tri,410)]}]},
+ {id:"traps",name:"Upper traps",items:[
+  {k:1,n:"Trap-bar shrug",tier:null,l:[]},
+  {k:2,n:"Wide-grip barbell shrug",tier:null,l:[]}]},
+ {id:"forearms",name:"Forearms",items:[
+  {k:1,n:"Dumbbell wrist curl / reverse curl",tier:null,l:[]},
+  {k:2,n:"Wrist roller",tier:null,l:[]}]},
+ {id:"abs",name:"Abs",items:[
+  {k:1,n:"Cable crunch",tier:null,l:[]},
+  {k:2,n:"Weight-plate crunch",tier:null,l:[]}]},
+ {id:"lowerback",name:"Lower back",items:[
+  {k:1,n:"Good morning",tier:null,l:[]},
+  {k:2,n:"Any deadlift variation",tier:null,note:"Conventional, sumo or Romanian",l:[]}]}
+];
+
+const yt=(v,t)=>`https://www.youtube.com/watch?v=${v}&t=${t}s`;
+const fmt=t=>`${Math.floor(t/60)}:${String(t%60).padStart(2,"0")}`;
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const play='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>';
+const tierCls={"S+":"t-splus","S":"t-s","A":"t-a"};
+
+let active="all", picksOnly=false;
+try{const s=JSON.parse(localStorage.getItem("np-ui")||"{}");if(s.active)active=s.active;picksOnly=!!s.picksOnly}catch(e){}
+if(active!=="all"&&!DATA.some(g=>g.id===active))active="all";
+const save=()=>{try{localStorage.setItem("np-ui",JSON.stringify({active,picksOnly}))}catch(e){}};
+
+function card(it){
+  const rank = it.k===1||it.k===2 ? it.k : "S";
+  const role = it.k===1?"Jeff's choice":it.k===2?"Backup option":it.k==="h"?`#1 for ${it.head.toLowerCase()}`:"S-tier extra";
+  const tier = it.tier?`<b class="tier ${tierCls[it.tier]}">${it.tier}</b>`:`<b class="tier t-na">Book only</b>`;
+  const links = it.l.map(x=>`<a class="ts" href="${yt(x.v,x.t)}" target="_blank" rel="noopener" aria-label="Watch ${esc(it.n)} at ${fmt(x.t)}">${play}${fmt(x.t)}</a>`).join("");
+  return `<div class="card${it.k===1?" pick":""}">
+    <span class="rank" aria-hidden="true">${it.k==="h"?"1":rank}</span>
+    <div class="name">${esc(it.n)} ${tier}</div>
+    <div class="role">${role}</div>
+    ${it.note?`<div class="note">${esc(it.note)}</div>`:""}
+    ${links?`<div class="links">${links}</div>`:""}</div>`;
+}
+
+function render(){
+  document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.id===active));
+  document.getElementById("picksOnly").checked=picksOnly;
+  const groups = DATA.filter(g=>active==="all"||g.id===active);
+  let n=0, html="";
+  for(const g of groups){
+    const pick=g.items.filter(i=>i.k===1||i.k===2);
+    const extra=picksOnly?[]:g.items.filter(i=>i.k==="s");
+    const heads=picksOnly?[]:g.items.filter(i=>i.k==="h");
+    n+=pick.length+extra.length+heads.length;
+    html+=`<section class="group"><div class="group-head"><h2>${g.name}</h2>${g.video?`<a href="https://www.youtube.com/watch?v=${g.video}" target="_blank" rel="noopener">Full video ↗</a>`:""}</div>
+      <div class="sub">The Muscle Ladder</div><div class="list">${pick.map(card).join("")}</div>
+      ${extra.length?`<div class="sub">Other S-tier (YouTube)</div><div class="list">${extra.map(card).join("")}</div>`:""}
+      ${heads.length?`<div class="sub">Best by delt head</div><div class="list">${heads.map(card).join("")}</div>`:""}
+      ${!picksOnly&&g.id==="triceps"?`<div class="sub">Other S-tier (YouTube)</div><p class="note" style="margin:0">None beyond the book picks.</p>`:""}
+    </section>`;
+  }
+  document.getElementById("out").innerHTML=html||`<p class="empty">Nothing to show.</p>`;
+  document.getElementById("count").textContent=`${n} exercise${n===1?"":"s"}`;
+}
+
+const chips=document.getElementById("chips");
+chips.innerHTML=[{id:"all",name:"All"},...DATA].map(g=>`<button class="chip" id="chip-${g.id}" data-id="${g.id}">${g.name}</button>`).join("");
+chips.addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;active=b.dataset.id;save();render();window.scrollTo({top:0})});
+document.getElementById("picksOnly").addEventListener("change",e=>{picksOnly=e.target.checked;save();render()});
+render();
+</script>
+
+<script>
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+</script>
+</body>
+</html>
