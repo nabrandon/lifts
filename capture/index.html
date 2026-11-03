@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Quick Add</title>
+<meta name="theme-color" content="#111418">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Quick Add">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#eef0f2; --surface:#ffffff; --ink:#15191e; --muted:#5d6670; --line:#d7dbe0;
+  --accent:#1f5fbf; --accent-ink:#ffffff; --ok:#2f8f4e; --bad:#c8262c;
+  --chip:#e1e5ea; --chip-on:#15191e; --chip-on-ink:#ffffff;
+  --body:system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111418; --surface:#1a1f25; --ink:#eef1f4; --muted:#98a2ad; --line:#2b323a;
+  --accent:#4d8ef0; --accent-ink:#0b0e12; --ok:#4cb872; --bad:#e5484d;
+  --chip:#242a32; --chip-on:#eef1f4; --chip-on-ink:#111418; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#111418; --surface:#1a1f25; --ink:#eef1f4; --muted:#98a2ad; --line:#2b323a;
+  --accent:#4d8ef0; --accent-ink:#0b0e12; --ok:#4cb872; --bad:#e5484d;
+  --chip:#242a32; --chip-on:#eef1f4; --chip-on-ink:#111418; color-scheme:dark }
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 var(--body)}
+.wrap{max-width:560px;margin:0 auto;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+header{display:flex;align-items:center;justify-content:space-between;margin:4px 0 14px}
+h1{font-size:1.6rem;font-weight:800;margin:0;letter-spacing:-.01em}
+.iconbtn{border:0;background:var(--chip);color:var(--ink);border-radius:999px;width:40px;height:40px;font-size:1.1rem;cursor:pointer}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+label.f{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin:0 0 6px}
+input[type=text],input[type=password],input[type=date],input[type=time],select,textarea{
+  width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;-webkit-appearance:none;appearance:none}
+textarea{min-height:70px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+#title{font-size:1.15rem;font-weight:600}
+.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:8px 0 0}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;border-radius:999px;padding:8px 14px;background:var(--chip);color:var(--ink);font:600 .9rem var(--body);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--chip-on);color:var(--chip-on-ink)}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;font-weight:600}
+.sw+.sw{border-top:1px solid var(--line)}
+.sw small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.sw input{width:48px;height:28px;-webkit-appearance:none;appearance:none;background:var(--chip);border-radius:999px;position:relative;cursor:pointer;flex:none;transition:background .15s}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0004;transition:transform .15s}
+.sw input:checked{background:var(--ok)}.sw input:checked::after{transform:translateX(20px)}
+.sub{margin-top:10px}.hide{display:none!important}
+.go{width:100%;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font:700 1.05rem var(--body);padding:14px;min-height:52px;cursor:pointer}
+.go:disabled{opacity:.55}
+.msg{border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.92rem}
+.msg.ok{background:color-mix(in srgb,var(--ok) 16%,var(--surface));border:1px solid color-mix(in srgb,var(--ok) 40%,transparent)}
+.msg.bad{background:color-mix(in srgb,var(--bad) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--bad) 40%,transparent)}
+.msg a{color:var(--accent)}
+.msg button{margin-top:8px;border:0;border-radius:8px;padding:8px 12px;background:var(--chip);color:var(--ink);font:600 .85rem var(--body);cursor:pointer}
+h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:22px 0 8px}
+.log{list-style:none;margin:0;padding:0;font-size:.9rem}
+.log li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.log span{color:var(--muted);white-space:nowrap}
+.set p{font-size:.88rem;color:var(--muted);margin:6px 0 12px}
+.set ol{font-size:.86rem;color:var(--muted);padding-left:20px;margin:6px 0 12px}
+.set code{font-size:.82rem;background:var(--bg);padding:1px 5px;border-radius:5px;word-break:break-all}
+.status{font-size:.85rem;font-weight:600}.status.on{color:var(--ok)}.status.off{color:var(--bad)}
+.ghost{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:10px 14px;font:600 .9rem var(--body);cursor:pointer;min-height:44px}
+details summary{cursor:pointer;font-weight:600;color:var(--muted);font-size:.9rem;list-style:none}
+details summary::-webkit-details-marker{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Quick Add</h1>
+    <button class="iconbtn" id="openSet" aria-label="Settings">⚙︎</button>
+  </header>
+
+  <div id="out"></div>
+
+  <!-- Settings -->
+  <div class="card set hide" id="setCard">
+    <div class="sw" style="padding-top:0">Google Calendar <span class="status" id="gStat"></span></div>
+    <label class="f" for="gClient">Google OAuth client ID</label>
+    <input type="text" id="gClient" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <details style="margin:10px 0 14px"><summary>How to get this ›</summary>
+      <ol>
+        <li>Open <a href="https://console.cloud.google.com/projectcreate" target="_blank">console.cloud.google.com</a> and create a project (any name).</li>
+        <li>APIs &amp; Services → Library → enable <b>Google Calendar API</b>.</li>
+        <li>OAuth consent screen (Google Auth Platform) → External → fill in the app name and your email. Under Audience, add <b>brandon.n2000@gmail.com</b> as a test user.</li>
+        <li>Clients → Create client → <b>Web application</b>.<br>Authorized JavaScript origin: <code id="originTxt"></code><br>Authorized redirect URI: <code id="redirTxt"></code></li>
+        <li>Copy the Client ID and paste it above.</li>
+      </ol>
+    </details>
+    <button class="ghost" id="gSignin">Sign in to Google</button>
+
+    <div class="sw" style="margin-top:14px;border-top:1px solid var(--line)">Todoist <span class="status" id="tStat"></span></div>
+    <label class="f" for="tToken">Todoist API token</label>
+    <input type="password" id="tToken" placeholder="Paste token" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <p>Todoist → Settings → Integrations → Developer → copy API token.</p>
+    <div class="row">
+      <button class="ghost" id="saveSet">Save</button>
+      <button class="ghost" id="closeSet">Done</button>
+    </div>
+    <p style="margin-top:12px">Saved only on this phone. Nothing is stored on GitHub.</p>
+  </div>
+
+  <!-- Form -->
+  <form id="form" autocomplete="off">
+    <div class="card">
+      <label class="f" for="title">What</label>
+      <input type="text" id="title" placeholder="Golf with Isaac" enterkeyhint="done" required>
+    </div>
+
+    <div class="card">
+      <label class="f" for="date">Date</label>
+      <input type="date" id="date" required>
+      <div class="chips" id="quick"></div>
+
+      <div class="sw" style="margin-top:8px">Multi-day <input type="checkbox" id="multi" aria-label="Multi-day"></div>
+      <div class="sub hide" id="multiBox">
+        <label class="f" for="endDate">Through</label>
+        <input type="date" id="endDate">
+      </div>
+
+      <div class="sw"><span>Set a time<small>Otherwise all day</small></span><input type="checkbox" id="timed" aria-label="Set a time"></div>
+      <div class="sub hide row" id="timeBox">
+        <div><label class="f" for="st">Start</label><input type="time" id="st" value="09:00"></div>
+        <div><label class="f" for="et">End</label><input type="time" id="et" value="10:00"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <details id="more"><summary>Location &amp; notes ›</summary>
+        <div class="sub"><label class="f" for="loc">Location</label><input type="text" id="loc"></div>
+        <div class="sub"><label class="f" for="notes">Notes</label><textarea id="notes"></textarea></div>
+      </details>
+    </div>
+
+    <div class="card">
+      <div class="sw" style="padding:0"><span>Also add to Todoist<small>Reminder at 8 AM that day</small></span><input type="checkbox" id="todo" aria-label="Also add to Todoist"></div>
+      <div class="sub hide" id="projBox">
+        <label class="f" for="proj">Project</label>
+        <select id="proj"><option value="">Inbox</option></select>
+      </div>
+    </div>
+
+    <button class="go" id="go" type="submit">Add to calendar</button>
+  </form>
+
+  <h2>Recent</h2>
+  <ul class="log" id="log"></ul>
+</div>
+
+<script>
+const TZ = "America/Chicago";
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d=null){ try{ const v = localStorage.getItem("qa_"+k); return v===null ? d : JSON.parse(v); }catch{ return d; } },
+  set(k, v){ try{ localStorage.setItem("qa_"+k, JSON.stringify(v)); }catch{} },
+  del(k){ try{ localStorage.removeItem("qa_"+k); }catch{} }
+};
+const REDIRECT = location.origin + location.pathname.replace(/index\.html$/, "");
+
+/* ---------- dates ---------- */
+const pad = n => String(n).padStart(2,"0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const addDays = (s, n) => { const [y,m,d] = s.split("-").map(Number); const t = new Date(y, m-1, d+n); return ymd(t); };
+const nice = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y,m-1,d).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"}); };
+const t12 = s => { let [h,m] = s.split(":").map(Number); return `${h%12||12}:${pad(m)} ${h<12?"AM":"PM"}`; };
+const toMin = s => { const [h,m] = s.split(":").map(Number); return h*60+m; };
+const fromMin = n => `${pad(Math.floor(n/60))}:${pad(n%60)}`;
+
+function quickChips(){
+  const now = new Date(), out = [["Today",0],["Tomorrow",1]];
+  for (const [name, dow] of [["Fri",5],["Sat",6],["Sun",0]]) {
+    let n = (dow - now.getDay() + 7) % 7; if (n < 2) n += 7; out.push([name, n]);
+  }
+  out.push(["Next week",7]);
+  const box = $("quick"); box.innerHTML = "";
+  out.forEach(([label, n]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = label;
+    const v = ymd(new Date(now.getFullYear(), now.getMonth(), now.getDate()+n));
+    b.onclick = () => { $("date").value = v; syncChips(); };
+    b.dataset.v = v; box.appendChild(b);
+  });
+  syncChips();
+}
+function syncChips(){ document.querySelectorAll("#quick .chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.v === $("date").value)); }
+
+/* ---------- UI ---------- */
+$("date").value = ymd(new Date());
+$("date").addEventListener("input", syncChips);
+quickChips();
+$("multi").onchange = () => { $("multiBox").classList.toggle("hide", !$("multi").checked); if ($("multi").checked && !$("endDate").value) $("endDate").value = addDays($("date").value, 1); };
+$("timed").onchange = () => $("timeBox").classList.toggle("hide", !$("timed").checked);
+$("st").onchange = () => { const s = toMin($("st").value), e = toMin($("et").value); if (!$("multi").checked && e <= s) $("et").value = fromMin(Math.min(s+60, 23*60+59)); };
+$("todo").onchange = () => { $("projBox").classList.toggle("hide", !$("todo").checked); store.set("todo", $("todo").checked); if ($("todo").checked) loadProjects(); };
+$("todo").checked = store.get("todo", false); $("projBox").classList.toggle("hide", !$("todo").checked);
+
+$("originTxt").textContent = location.origin;
+$("redirTxt").textContent = REDIRECT;
+function refreshSet(){
+  $("gClient").value = store.get("gclient","");
+  $("tToken").value = store.get("ttoken","");
+  const g = gToken();
+  $("gStat").textContent = g ? "Signed in" : (store.get("gclient") ? "Not signed in" : "Not set up");
+  $("gStat").className = "status " + (g ? "on" : "off");
+  $("tStat").textContent = store.get("ttoken") ? "Connected" : "Not set up";
+  $("tStat").className = "status " + (store.get("ttoken") ? "on" : "off");
+}
+$("openSet").onclick = () => { refreshSet(); $("setCard").classList.toggle("hide"); };
+$("closeSet").onclick = () => $("setCard").classList.add("hide");
+$("saveSet").onclick = () => {
+  store.set("gclient", $("gClient").value.trim());
+  const t = $("tToken").value.trim(); if (t !== store.get("ttoken","")) { store.set("ttoken", t); store.del("projects"); }
+  refreshSet(); loadProjects(); show("ok", "Settings saved.");
+};
+$("gSignin").onclick = () => { store.set("gclient", $("gClient").value.trim()); googleAuth(); };
+
+function show(kind, html){ const d = document.createElement("div"); d.className = "msg " + kind; d.innerHTML = html; $("out").prepend(d); scrollTo({top:0,behavior:"smooth"}); return d; }
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- Google auth (redirect token flow) ---------- */
+function gToken(){ const t = store.get("gtoken"); return t && t.exp > Date.now() + 60000 ? t.v : null; }
+function googleAuth(){
+  const cid = store.get("gclient");
+  if (!cid) { refreshSet(); $("setCard").classList.remove("hide"); show("bad","Add your Google client ID in settings first."); return; }
+  const p = new URLSearchParams({ client_id: cid, redirect_uri: REDIRECT, response_type: "token",
+    scope: "https://www.googleapis.com/auth/calendar.events", include_granted_scopes: "true", login_hint: "brandon.n2000@gmail.com" });
+  location.href = "https://accounts.google.com/o/oauth2/v2/auth?" + p;
+}
+(function catchToken(){
+  if (!location.hash.includes("access_token") && !location.hash.includes("error")) return;
+  const h = new URLSearchParams(location.hash.slice(1));
+  history.replaceState(null, "", location.pathname);
+  if (h.get("access_token")) store.set("gtoken", { v: h.get("access_token"), exp: Date.now() + (Number(h.get("expires_in")||3600) * 1000) });
+  else show("bad", "Google sign-in failed: " + esc(h.get("error")));
+})();
+
+async function gapi(method, path, body){
+  const r = await fetch("https://www.googleapis.com/calendar/v3/" + path, {
+    method, headers: { Authorization: "Bearer " + gToken(), ...(body ? {"Content-Type":"application/json"} : {}) },
+    body: body ? JSON.stringify(body) : undefined });
+  if (r.status === 401) { store.del("gtoken"); throw new Error("AUTH"); }
+  if (!r.ok && r.status !== 204) throw new Error("Google " + r.status + ": " + (await r.text()).slice(0,200));
+  return r.status === 204 ? null : r.json();
+}
+
+/* ---------- Todoist ---------- */
+async function tapi(method, path, body){
+  const r = await fetch("https://api.todoist.com/api/v1/" + path, {
+    method, headers: { Authorization: "Bearer " + store.get("ttoken"), ...(body ? {"Content-Type":"application/json"} : {}) },
+    body: body ? JSON.stringify(body) : undefined });
+  if (!r.ok) throw new Error("Todoist " + r.status + ": " + (await r.text()).slice(0,200));
+  return r.status === 204 ? null : r.json().catch(() => null);
+}
+function fillProjects(list){
+  const sel = $("proj"), keep = store.get("proj", "");
+  sel.innerHTML = "";
+  list.forEach(p => { const o = document.createElement("option"); o.value = p.id; o.textContent = p.name; sel.appendChild(o); });
+  if ([...sel.options].some(o => o.value === keep)) sel.value = keep;
+}
+async function loadProjects(){
+  const cached = store.get("projects"); if (cached) fillProjects(cached);
+  if (!store.get("ttoken")) return;
+  try {
+    const d = await tapi("GET", "projects?limit=200");
+    const list = (d.results || d).filter(p => !p.is_archived)
+      .sort((a,b) => (b.inbox_project?1:0) - (a.inbox_project?1:0))
+      .map(p => ({ id: p.id, name: p.inbox_project ? "Inbox" : p.name }));
+    store.set("projects", list); fillProjects(list);
+  } catch(e) { /* keep cached list */ }
+}
+$("proj").onchange = () => store.set("proj", $("proj").value);
+
+/* ---------- submit ---------- */
+function readForm(){
+  return { title: $("title").value.trim(), date: $("date").value,
+    multi: $("multi").checked, endDate: $("endDate").value, timed: $("timed").checked,
+    st: $("st").value, et: $("et").value, loc: $("loc").value.trim(), notes: $("notes").value.trim(),
+    todo: $("todo").checked, proj: $("proj").value };
+}
+function writeForm(f){
+  $("title").value = f.title; $("date").value = f.date; $("multi").checked = f.multi; $("endDate").value = f.endDate;
+  $("timed").checked = f.timed; $("st").value = f.st; $("et").value = f.et; $("loc").value = f.loc; $("notes").value = f.notes;
+  $("todo").checked = f.todo; $("multi").onchange(); $("timed").onchange(); $("projBox").classList.toggle("hide", !f.todo);
+  if (f.loc || f.notes) $("more").open = true; syncChips();
+}
+
+$("form").onsubmit = e => { e.preventDefault(); submit(readForm()); };
+
+async function submit(f){
+  if (!f.title) { $("title").focus(); return; }
+  if (!f.date) { $("date").focus(); return; }
+  const end = f.multi && f.endDate && f.endDate >= f.date ? f.endDate : f.date;
+  if (!gToken()) { store.set("pending", f); googleAuth(); return; }
+  if (f.todo && !store.get("ttoken")) { refreshSet(); $("setCard").classList.remove("hide"); show("bad","Add your Todoist token in settings, or switch Todoist off."); return; }
+
+  $("go").disabled = true; $("go").textContent = "Adding…";
+  try {
+    // 1. Calendar event with 1-week and 3-day push reminders
+    const ev = { summary: f.title, reminders: { useDefault: false, overrides: [{method:"popup",minutes:10080},{method:"popup",minutes:4320}] } };
+    if (f.loc) ev.location = f.loc;
+    if (f.notes) ev.description = f.notes;
+    let whenTxt;
+    if (f.timed) {
+      let et = f.et;
+      if (end === f.date && toMin(et) <= toMin(f.st)) et = fromMin(Math.min(toMin(f.st)+60, 23*60+59));
+      ev.start = { dateTime: `${f.date}T${f.st}:00`, timeZone: TZ };
+      ev.end = { dateTime: `${end}T${et}:00`, timeZone: TZ };
+      whenTxt = end === f.date ? `${nice(f.date)}, ${t12(f.st)}–${t12(et)}` : `${nice(f.date)} ${t12(f.st)} → ${nice(end)} ${t12(et)}`;
+    } else {
+      ev.start = { date: f.date }; ev.end = { date: addDays(end, 1) };
+      whenTxt = end === f.date ? `${nice(f.date)}, all day` : `${nice(f.date)} → ${nice(end)}, all day`;
+    }
+    const created = await gapi("POST", "calendars/primary/events", ev);
+
+    // 2. Look for a copy Google added from Gmail on the same day(s)
+    let gmailDupes = [];
+    try {
+      const iso = v => { const [y,m,d] = v.split("-").map(Number); return new Date(y,m-1,d).toISOString(); };
+      const q = new URLSearchParams({ timeMin: iso(f.date), timeMax: iso(addDays(end,1)), singleEvents: "true", eventTypes: "fromGmail" });
+      const list = await gapi("GET", "calendars/primary/events?" + q);
+      gmailDupes = (list.items || []).filter(x => x.id !== created.id);
+    } catch(e) { if (e.message === "AUTH") throw e; }
+
+    // 3. Todoist task on the start date, one push reminder, no auto 30-min one
+    let todoTxt = "";
+    if (f.todo) {
+      const task = { content: f.title };
+      if (f.notes || f.loc) task.description = [f.loc, f.notes].filter(Boolean).join("\n");
+      if (f.proj) task.project_id = f.proj;
+      if (f.timed) { task.due_string = `${f.date} ${f.st}`; task.due_lang = "en"; } else task.due_date = f.date;
+      const t = await tapi("POST", "tasks", task);
+      let rem = "08:00";
+      if (f.timed && toMin(f.st) <= 8*60) rem = fromMin(Math.max(toMin(f.st) - 120, 0));
+      await tapi("POST", "reminders", { task_id: t.id, reminder_type: "absolute", due: { date: `${f.date}T${rem}:00`, timezone: TZ }, service: "push" });
+      if (f.timed) {
+        await new Promise(r => setTimeout(r, 700));
+        try {
+          const rs = await tapi("GET", "reminders?task_id=" + encodeURIComponent(t.id));
+          for (const r of (rs.results || rs || [])) if (r.type === "relative") await tapi("DELETE", "reminders/" + r.id);
+        } catch(e) {}
+      }
+      const pname = $("proj").selectedOptions[0]?.textContent || "Inbox";
+      todoTxt = ` Todoist: ${esc(pname)}, reminder ${t12(rem)}.`;
+    }
+
+    const box = show("ok", `<b>${esc(f.title)}</b> added for ${esc(whenTxt)}. <a href="${esc(created.htmlLink)}" target="_blank">Open</a>.${todoTxt}`);
+    gmailDupes.forEach(d => {
+      const b = document.createElement("button"); b.type = "button";
+      b.textContent = `Remove Google's copy: “${d.summary || "Untitled"}”`;
+      b.onclick = async () => { b.disabled = true; try { await gapi("DELETE", "calendars/primary/events/" + d.id); b.textContent = "Removed"; } catch(e) { b.textContent = "Couldn't remove"; } };
+      box.appendChild(document.createElement("br")); box.appendChild(b);
+    });
+
+    const log = store.get("log", []); log.unshift({ t: f.title, w: whenTxt, u: created.htmlLink }); store.set("log", log.slice(0, 8)); drawLog();
+    store.del("pending");
+    $("title").value = ""; $("loc").value = ""; $("notes").value = ""; $("more").open = false;
+  } catch(e) {
+    if (e.message === "AUTH") { store.set("pending", f); googleAuth(); return; }
+    show("bad", esc(e.message));
+  } finally {
+    $("go").disabled = false; $("go").textContent = "Add to calendar";
+  }
+}
+
+function drawLog(){
+  const ul = $("log"); ul.innerHTML = "";
+  const items = store.get("log", []);
+  if (!items.length) { ul.innerHTML = '<li><span>Nothing yet</span></li>'; return; }
+  items.forEach(i => { const li = document.createElement("li"); li.innerHTML = `<a href="${esc(i.u)}" target="_blank" style="color:inherit">${esc(i.t)}</a><span>${esc(i.w)}</span>`; ul.appendChild(li); });
+}
+
+/* ---------- start ---------- */
+drawLog(); loadProjects();
+const pending = store.get("pending");
+if (pending && gToken()) { writeForm(pending); submit(pending); }
+else if (pending) store.del("pending");
+if (!store.get("gclient")) { refreshSet(); $("setCard").classList.remove("hide"); }
+</script>
+</body>
+</html>
