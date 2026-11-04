@@ -18,7 +18,7 @@
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{-webkit-text-size-adjust:100%}body{margin:0}
 
-/* Layout: sticky muscle-group rail on top, single column of exercise cards; tier badges use competition plate colors */
+/* Layout: Upper / Leg day tabs; upper has a sticky muscle-group rail, leg day is one ordered list, single column of exercise cards; tier badges use competition plate colors */
 :root{
   --bg:#eef0f2; --surface:#ffffff; --ink:#15191e; --muted:#5d6670; --line:#d7dbe0;
   --plate-red:#c8262c; --plate-blue:#1f5fbf; --plate-yellow:#d9a400; --plate-green:#2f8f4e;
@@ -76,6 +76,29 @@ section.group{margin-top:26px}
 .note{grid-column:2;font-size:.8rem;color:var(--muted)}
 .empty{color:var(--muted);text-align:center;padding:30px 0}
 footer{margin-top:36px;font-size:.8rem;color:var(--muted)}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:16px;padding:4px;background:var(--chip);border-radius:12px}
+.tab{border:0;border-radius:9px;padding:10px 8px;background:transparent;color:var(--muted);font:800 1.05rem var(--display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.tab:focus-visible{outline:2px solid var(--plate-blue);outline-offset:2px}
+.leg-meta{display:flex;flex-wrap:wrap;gap:6px 16px;margin:18px 0 4px;font-size:.85rem;color:var(--muted)}
+.leg-meta b{color:var(--ink);font-variant-numeric:tabular-nums}
+.steps{display:grid;gap:10px;margin-top:12px;padding:0;list-style:none;counter-reset:step}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.step .num{grid-row:span 3;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:800 1rem var(--display);background:var(--ink);color:var(--bg)}
+.step .muscle{font-size:.82rem;color:var(--muted)}
+.step .rx{font:500 .88rem var(--mono);font-variant-numeric:tabular-nums}
+.step .note{margin-top:2px}
+.ty{font:800 .72rem var(--display);letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px;line-height:1.35;white-space:nowrap}
+.ty-reg{background:var(--chip);color:var(--ink)} .ty-iso{background:var(--plate-blue);color:#fff} .ty-band{background:var(--plate-green);color:#fff} .ty-bal{background:var(--plate-yellow);color:#1b1600}
+.opts{grid-column:2;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.opt{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg);min-width:0}
+.opt h4{margin:0 0 2px;font:800 .9rem var(--display);letter-spacing:.06em;text-transform:uppercase}
+.opt.max h4{color:var(--plate-red)} .opt.light h4{color:var(--plate-blue)}
+.opt .hold{font:500 .85rem var(--mono);font-variant-numeric:tabular-nums}
+.opt p{margin:4px 0 0;font-size:.8rem;color:var(--muted)}
+.choose{grid-column:2;margin-top:6px;font-size:.82rem;line-height:1.4}
+.choose b{font-weight:600}
+@media (max-width:380px){.opts{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:no-preference){.chip,.ts{transition:background .15s,border-color .15s,color .15s}}
 </style>
 
@@ -83,27 +106,39 @@ footer{margin-top:36px;font-size:.8rem;color:var(--muted)}
 <body>
 <div class="wrap">
   <header>
-    <h1>Nippard Upper Body Picks</h1>
-    <p>Jeff's #1 and backup choices from The Muscle Ladder, plus the S-tier extras from his YouTube tier lists. Tap a timestamp to jump to that spot in the video.</p>
-    <div class="legend">
-      <span><b class="tier t-splus">S+</b>top of tier list</span>
-      <span><b class="tier t-s">S</b></span>
-      <span><b class="tier t-a">A</b></span>
-      <span><b class="rank" style="width:20px;height:20px;font-size:.7rem;background:var(--ink);color:var(--bg)">1</b>Jeff's choice</span>
+    <h1>Optimal Upper, Functional Lower</h1>
+    <div class="tabs" role="tablist" aria-label="Workout">
+      <button class="tab" role="tab" id="tab-upper" data-tab="upper" aria-controls="panel-upper">Upper</button>
+      <button class="tab" role="tab" id="tab-legs" data-tab="legs" aria-controls="panel-legs">Leg day</button>
     </div>
   </header>
+
+  <div id="panel-upper" role="tabpanel" aria-labelledby="tab-upper">
+  <p class="intro" style="color:var(--muted);margin:14px 0 0;font-size:.95rem">Top pick and backup for each muscle, plus other S-tier options. Tap a timestamp to jump to that spot in the video.</p>
+  <div class="legend">
+    <span><b class="tier t-splus">S+</b>top of tier list</span>
+    <span><b class="tier t-s">S</b></span>
+    <span><b class="tier t-a">A</b></span>
+    <span><b class="rank" style="width:20px;height:20px;font-size:.7rem;background:var(--ink);color:var(--bg)">1</b>Top pick</span>
+  </div>
 
   <div class="bar">
     <div class="chips" id="chips" role="group" aria-label="Muscle group"></div>
     <div class="row2">
-      <label class="toggle"><input type="checkbox" id="picksOnly"> Book picks only (#1 and #2)</label>
+      <label class="toggle"><input type="checkbox" id="picksOnly"> Top picks only (#1 and #2)</label>
       <span id="count"></span>
     </div>
   </div>
 
   <main id="out"></main>
+  <footer>Traps, forearms, abs and lower back have no tier-list video, so they show the top picks only.</footer>
+  </div>
 
-  <footer>Compiled from a r/JeffNippard community post. Tiers come from Jeff's YouTube tier list playlist. Traps, forearms, abs and lower back have no tier-list video, so they show the book picks only.</footer>
+  <div id="panel-legs" role="tabpanel" aria-labelledby="tab-legs" hidden>
+    <div class="leg-meta"><span><b>12</b> exercises</span><span><b>55–60</b> min</span><span>Do them in this order</span></div>
+    <p class="note" style="margin:0">Keep anything that loads the ankle at 3/10 pain or less. Warm up for a few minutes before the pin pull.</p>
+    <ol class="steps" id="legs"></ol>
+  </div>
 </div>
 
 <script>
@@ -171,8 +206,8 @@ const save=()=>{try{localStorage.setItem("np-ui",JSON.stringify({active,picksOnl
 
 function card(it){
   const rank = it.k===1||it.k===2 ? it.k : "S";
-  const role = it.k===1?"Jeff's choice":it.k===2?"Backup option":it.k==="h"?`#1 for ${it.head.toLowerCase()}`:"S-tier extra";
-  const tier = it.tier?`<b class="tier ${tierCls[it.tier]}">${it.tier}</b>`:`<b class="tier t-na">Book only</b>`;
+  const role = it.k===1?"Top pick":it.k===2?"Backup option":it.k==="h"?`#1 for ${it.head.toLowerCase()}`:"S-tier extra";
+  const tier = it.tier?`<b class="tier ${tierCls[it.tier]}">${it.tier}</b>`:`<b class="tier t-na">Unranked</b>`;
   const links = it.l.map(x=>`<a class="ts" href="${yt(x.v,x.t)}" target="_blank" rel="noopener" aria-label="Watch ${esc(it.n)} at ${fmt(x.t)}">${play}${fmt(x.t)}</a>`).join("");
   return `<div class="card${it.k===1?" pick":""}">
     <span class="rank" aria-hidden="true">${it.k==="h"?"1":rank}</span>
@@ -193,10 +228,10 @@ function render(){
     const heads=picksOnly?[]:g.items.filter(i=>i.k==="h");
     n+=pick.length+extra.length+heads.length;
     html+=`<section class="group"><div class="group-head"><h2>${g.name}</h2>${g.video?`<a href="https://www.youtube.com/watch?v=${g.video}" target="_blank" rel="noopener">Full video ↗</a>`:""}</div>
-      <div class="sub">The Muscle Ladder</div><div class="list">${pick.map(card).join("")}</div>
+      <div class="sub">Top pick and backup</div><div class="list">${pick.map(card).join("")}</div>
       ${extra.length?`<div class="sub">Other S-tier (YouTube)</div><div class="list">${extra.map(card).join("")}</div>`:""}
       ${heads.length?`<div class="sub">Best by delt head</div><div class="list">${heads.map(card).join("")}</div>`:""}
-      ${!picksOnly&&g.id==="triceps"?`<div class="sub">Other S-tier (YouTube)</div><p class="note" style="margin:0">None beyond the book picks.</p>`:""}
+      ${!picksOnly&&g.id==="triceps"?`<div class="sub">Other S-tier (YouTube)</div><p class="note" style="margin:0">None beyond the top picks.</p>`:""}
     </section>`;
   }
   document.getElementById("out").innerHTML=html||`<p class="empty">Nothing to show.</p>`;
@@ -208,6 +243,49 @@ chips.innerHTML=[{id:"all",name:"All"},...DATA].map(g=>`<button class="chip" id=
 chips.addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;active=b.dataset.id;save();render();window.scrollTo({top:0})});
 document.getElementById("picksOnly").addEventListener("change",e=>{picksOnly=e.target.checked;save();render()});
 render();
+
+const LEGS=[
+ {n:"Single-leg balance",m:"Ankle stabilizers",ty:"bal",tl:"Balance",rx:"2 × 30s per side",note:"Stand on a pad. Close your eyes once it gets easy."},
+ {n:"Pin RDL pull",m:"Hamstrings, glutes, lower back",ty:"iso",tl:"Isometric · overcoming",rx:"Bar against the pins at knee height, pull up into them",
+  iso:{max:["4 × 5–6s","Pull as hard as you can. Rest 90–120s."],light:["3 × 30–45s","Pull at 60–70%, firm and controlled. Rest 60s."],
+   pick:"Max when you're fresh and your hamstrings and back feel good. Light the day after a long run, if you feel tight, or on an easy week."}},
+ {n:"Single-leg Smith RDL",m:"Hamstrings, glutes",ty:"reg",tl:"Regular lift",rx:"3 × 6–8 per side"},
+ {n:"Weighted single-leg step-down",m:"Quads",ty:"reg",tl:"Regular lift",rx:"3 × 8 per side, 3s lowering",note:"Hold dumbbells. Stop if the inside of the ankle hurts at the bottom."},
+ {n:"Sled push",m:"Quads, glutes, calves",ty:"reg",tl:"Regular lift",rx:"4 × 20 m, rest 60–90s"},
+ {n:"Nordic hamstring curl",m:"Hamstrings",ty:"reg",tl:"Regular lift · bodyweight",rx:"3 × 4–6",note:"Use a band or do the lowering only if you can't control the full rep."},
+ {n:"Leg extension",m:"Quads",ty:"reg",tl:"Regular lift + optional hold",rx:"3 × 10–12",
+  iso:{max:["5s on the last rep","Heavy weight. Squeeze as hard as you can at the top."],light:["30s on the last rep","Lighter weight. Hold at the top or halfway at 6/10 effort."],
+   pick:"Max on strong days. Light if your knees feel achy or it's been a heavy running week. Skip the hold if you're short on time."}},
+ {n:"Seated adductor",m:"Inner thigh",ty:"reg",tl:"Regular lift · machine",rx:"3 × 10–12",note:"Go straight into the abductor to save time."},
+ {n:"Seated abductor",m:"Outer hip (glute medius)",ty:"reg",tl:"Regular lift · machine",rx:"3 × 10–12"},
+ {n:"Leg raise on the hamstring curl machine",m:"Hip flexors",ty:"reg",tl:"Regular lift · machine",rx:"3 × 8–10 per side"},
+ {n:"Single-leg calf raise",m:"Calves",ty:"reg",tl:"Regular lift",rx:"3 × 10–12, 2s hold at the top"},
+ {n:"Banded ankle inversion",m:"Posterior tibialis (behind the inner ankle bone)",ty:"band",tl:"Banded resistance",rx:"2 × 15 per side"}
+];
+document.getElementById("legs").innerHTML=LEGS.map((x,i)=>`<li class="step">
+  <span class="num" aria-hidden="true">${i+1}</span>
+  <div class="name">${esc(x.n)} <span class="ty ty-${x.ty}">${x.tl}</span></div>
+  <div class="muscle">${esc(x.m)}</div>
+  <div class="rx">${esc(x.rx)}</div>
+  ${x.note?`<div class="note">${esc(x.note)}</div>`:""}
+  ${x.iso?`<div class="opts">
+    <div class="opt max"><h4>Max effort</h4><div class="hold">${x.iso.max[0]}</div><p>${esc(x.iso.max[1])}</p></div>
+    <div class="opt light"><h4>Light effort</h4><div class="hold">${x.iso.light[0]}</div><p>${esc(x.iso.light[1])}</p></div>
+  </div><div class="choose"><b>Which to pick:</b> ${esc(x.iso.pick)}</div>`:""}
+</li>`).join("");
+
+let tab="upper";
+try{tab=localStorage.getItem("lifts-tab")||"upper"}catch(e){}
+if(location.hash==="#legs")tab="legs";
+function showTab(t){
+  tab=t==="legs"?"legs":"upper";
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
+  document.getElementById("panel-upper").hidden=tab!=="upper";
+  document.getElementById("panel-legs").hidden=tab!=="legs";
+  try{localStorage.setItem("lifts-tab",tab)}catch(e){}
+}
+document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(b){showTab(b.dataset.tab);window.scrollTo({top:0})}});
+showTab(tab);
 </script>
 
 <script>
